@@ -7,6 +7,8 @@ HEADERS = rt.hpp
 OBJ = $(SRCS:.cpp=.o)
 EXEC = rt_program
 
+all: $(EXEC)
+
 # Target to build the executable
 $(EXEC): $(OBJ)
 	$(CC) $(OBJ) -o $(EXEC)
