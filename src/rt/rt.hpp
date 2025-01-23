@@ -45,4 +45,4 @@ private:
     uint32_t calculateRowSize() const;
 };
 
-#endif _rt_h_
+#endif
