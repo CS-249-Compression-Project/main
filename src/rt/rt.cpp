@@ -15,6 +15,16 @@ void createFile(const std::string& file_name) {
     file.close();
 }
 
+bool removeFile(const char* filename) {
+    if (remove(filename) == 0) {
+        std::cout << "File successfully deleted: " << filename << std::endl;
+        return true;  // Successfully removed the file
+    } else {
+        std::perror("Error deleting file");
+        return false;  // Failed to remove the file
+    }
+}
+
 // RelationalTable
 
 RelationalTable::RelationalTable(const std::string& file_name) : file_name_(file_name) {
@@ -39,28 +49,29 @@ RelationalTable::RelationalTable(const std::string& file_name, const uint32_t nu
     this->num_columns_ = num_columns;
 }
 
-bool RelationalTable::writeNumEntries(uint32_t num_entries) {
-    std::ofstream file(file_name_, std::ios::binary | std::ios::in | std::ios::out);
+uint32_t RelationalTable::readNumEntries() const {
+    std::ifstream file(file_name_, std::ios::binary | std::ios::in);
     if (!file.is_open()) {
-        return false;
+        return 0;
     }
 
-    file.seekp(0);
-    file.write(reinterpret_cast<const char*>(&num_entries), sizeof(num_entries));
+    uint32_t num_entries;
+    file.read(reinterpret_cast<char*>(&num_entries), sizeof(num_entries));
     file.close();
-    return true;
+    return num_entries;
 }
 
-bool RelationalTable::writeNumColumns(uint32_t num_columns) {
-    std::ofstream file(file_name_, std::ios::binary | std::ios::in | std::ios::out);
+uint32_t RelationalTable::readNumColumns() const {
+    std::ifstream file(file_name_, std::ios::binary | std::ios::in);
     if (!file.is_open()) {
-        return false;
+        return 0;
     }
 
-    file.seekp(sizeof(num_entries_));
-    file.write(reinterpret_cast<const char*>(&num_columns), sizeof(num_columns));
+    uint32_t num_columns;
+    file.seekg(sizeof(num_entries_));
+    file.read(reinterpret_cast<char*>(&num_columns), sizeof(num_columns));
     file.close();
-    return true;
+    return num_columns;
 }
 
 bool RelationalTable::parseMetadata() {
@@ -92,29 +103,29 @@ bool RelationalTable::writeMetadata(uint32_t num_entries, uint32_t num_columns) 
     return true;
 }
 
-uint32_t RelationalTable::readNumEntries() const {
-    std::ifstream file(file_name_, std::ios::binary | std::ios::in);
+bool RelationalTable::writeNumEntries(uint32_t num_entries) {
+    std::ofstream file(file_name_, std::ios::binary | std::ios::in | std::ios::out);
     if (!file.is_open()) {
-        return 0;
+        return false;
     }
 
-    uint32_t num_entries;
-    file.read(reinterpret_cast<char*>(&num_entries), sizeof(num_entries));
+    file.seekp(0);
+    file.write(reinterpret_cast<const char*>(&num_entries), sizeof(num_entries));
     file.close();
-    return num_entries;
+    return true;
 }
 
-uint32_t RelationalTable::readNumColumns() const {
-    std::ifstream file(file_name_, std::ios::binary | std::ios::in);
+bool RelationalTable::writeNumColumns(uint32_t num_columns) {
+    std::ofstream file(file_name_, std::ios::binary | std::ios::in | std::ios::out);
     if (!file.is_open()) {
-        return 0;
+        return false;
     }
 
-    uint32_t num_columns;
-    file.seekg(sizeof(num_entries_));
-    file.read(reinterpret_cast<char*>(&num_columns), sizeof(num_columns));
+    file.seekp(sizeof(num_entries_));
+    file.write(reinterpret_cast<const char*>(&num_columns), sizeof(num_columns));
     file.close();
-    return num_columns;
+    return true;
 }
+
 
 #include <iostream>
