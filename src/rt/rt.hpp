@@ -32,10 +32,11 @@ public:
     // Decompress the table data
     void decompressData();
 
+    // Getters
     uint32_t readNumEntries() const;
     uint32_t readNumColumns() const;
 
-private:
+protected:
     std::string file_name_;                   // File path for the table
     uint32_t num_entries_;                    // Number of rows
     uint32_t num_columns_;                    // Number of columns
@@ -47,7 +48,7 @@ private:
     // Calculate row size from metadata in bytes
     uint32_t calculateRowSize() const;
 
-    // Getters and setters
+    // Setters
     bool writeMetadata(uint32_t num_entries, uint32_t num_columns);
     bool writeNumEntries(uint32_t num_entries);
     bool writeNumColumns(uint32_t num_columns);

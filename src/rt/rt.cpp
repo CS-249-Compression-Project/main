@@ -7,7 +7,7 @@
 
 bool fileExists(const std::string& file_name) {
     std::ifstream file(file_name);  // Try to open the file in input mode
-    return file.good();  // If the file is openable, it exists
+    return file.good();             // If the file is openable, it exists
 }
 
 void createFile(const std::string& file_name) {
@@ -18,9 +18,9 @@ void createFile(const std::string& file_name) {
 // RelationalTable
 
 RelationalTable::RelationalTable(const std::string& file_name) : file_name_(file_name) {
-    // if (!parseMetadata()) {
-    //     std::cerr << "Error: Unable to parse metadata for table " << file_name << std::endl;
-    // }
+    if (!parseMetadata()) {
+        std::cerr << "Error: Unable to parse metadata for table " << file_name << std::endl;
+    }
 }
 
 RelationalTable::RelationalTable(const std::string& file_name, const uint32_t num_columns) : file_name_(file_name), num_columns_(num_columns) {
@@ -34,6 +34,9 @@ RelationalTable::RelationalTable(const std::string& file_name, const uint32_t nu
     if (!writeMetadata(0, num_columns)) {
         std::cerr << "Error: Unable to write metadata for table " << file_name << std::endl;
     }
+
+    this->num_entries_ = 0;
+    this->num_columns_ = num_columns;
 }
 
 bool RelationalTable::writeNumEntries(uint32_t num_entries) {
@@ -58,6 +61,23 @@ bool RelationalTable::writeNumColumns(uint32_t num_columns) {
     file.write(reinterpret_cast<const char*>(&num_columns), sizeof(num_columns));
     file.close();
     return true;
+}
+
+bool RelationalTable::parseMetadata() {
+    std::ifstream file(file_name_, std::ios::binary | std::ios::in);
+    if (!file.is_open()) {
+        return false;
+    }
+
+    file.read(reinterpret_cast<char*>(&num_entries_), sizeof(num_entries_));
+    file.read(reinterpret_cast<char*>(&num_columns_), sizeof(num_columns_));
+    file.close();
+    return true;
+}
+
+// Calculate the size of a row in bytes
+uint32_t RelationalTable::calculateRowSize() const {
+    return this->num_columns_ * sizeof(uint32_t);
 }
 
 bool RelationalTable::writeMetadata(uint32_t num_entries, uint32_t num_columns) {
