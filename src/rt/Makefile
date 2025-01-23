@@ -29,7 +29,7 @@ $(TESTS).o: ../tests/$(TESTS).cpp $(HEADERS)
 
 # Clean up the generated files
 clean:
-	rm -f $(OBJ) $(EXEC) $(TESTS) $(TESTS_OBJ)
+	rm -f $(OBJ) $(EXEC) $(TESTS) ../tests/$(TESTS_OBJ)
 
 # Phony targets (these aren't real files, just commands)
 .PHONY: clean
