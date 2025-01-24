@@ -19,6 +19,9 @@ public:
     // Create a new table with the given column metadata
     RelationalTable(const std::string& file_name, const uint32_t num_columns);
 
+    // Print the table data
+    void printTable() const;
+
     // Add a new row to the table
     void addRow_uint32_t(const std::vector<uint32_t>& row_data);
     void addRow_float(const std::vector<float>& row_data);

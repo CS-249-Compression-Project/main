@@ -28,6 +28,40 @@ RelationalTable::RelationalTable(const std::string& file_name, const uint32_t nu
     this->num_columns_ = num_columns;
 }
 
+// uses float--we don't really need uint32_t
+void RelationalTable::printTable() const {
+    std::ifstream file(file_name_, std::ios::binary | std::ios::in);
+    if (!file.is_open()) {
+        std::cerr << "Error: Unable to open file " << file_name_ << std::endl;
+        return;
+    }
+
+    std::cout << "Table: " << file_name_ << std::endl;
+    std::cout << "Number of entries: " << num_entries_ << std::endl;
+    std::cout << "Number of columns: " << num_columns_ << std::endl;
+
+    // calculate the size of a row in bytes
+    uint32_t row_size = calculateRowSize();
+
+    // loop through each row and print the data
+    for (int i = 0; i < num_entries_; i++) {
+        // calculate the offset to the row_index
+        uint32_t offset = sizeof(num_entries_) + sizeof(num_columns_) + i * row_size;
+
+        // seek to the offset
+        file.seekg(offset);
+
+        // read the row data
+        for (float item : this->getRow_float(i)) {
+            std::cout << item << " ";
+        }
+        
+        std::cout << std::endl;
+    }
+
+    file.close();
+}
+
 void RelationalTable::addRow_uint32_t(const std::vector<uint32_t>& row_data) {
     if (row_data.size() != num_columns_) {
         std::cerr << "Error: Row data size does not match number of columns" << std::endl;
