@@ -2,8 +2,8 @@
 include ../makefile.inc
 
 # Define the sources and the output executable
-SRCS = rt.cpp rt_handler.cpp
-HEADERS = rt.hpp
+SRCS = rt.cpp helper.cpp rt_handler.cpp 
+HEADERS = rt.hpp helper.hpp
 OBJ = $(SRCS:.cpp=.o)
 EXEC = rt_program
 TESTS = test_1
@@ -29,7 +29,7 @@ $(TESTS).o: ../tests/$(TESTS).cpp $(HEADERS)
 
 # Clean up the generated files
 clean:
-	rm -f $(OBJ) $(EXEC) $(TESTS) ../tests/$(TESTS_OBJ)
+	rm -f $(OBJ) $(EXEC) $(TESTS) $(TESTS_OBJ)
 
 # Phony targets (these aren't real files, just commands)
 .PHONY: clean

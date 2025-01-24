@@ -1,29 +1,8 @@
 #include "rt.hpp"
+#include "helper.hpp"
 
 #include <fstream>
 #include <iostream>
-
-// Helper
-
-bool fileExists(const std::string& file_name) {
-    std::ifstream file(file_name);  // Try to open the file in input mode
-    return file.good();             // If the file is openable, it exists
-}
-
-void createFile(const std::string& file_name) {
-    std::ofstream file(file_name, std::ios::out | std::ios::trunc);
-    file.close();
-}
-
-bool removeFile(const char* filename) {
-    if (remove(filename) == 0) {
-        std::cout << "File successfully deleted: " << filename << std::endl;
-        return true;  // Successfully removed the file
-    } else {
-        std::perror("Error deleting file");
-        return false;  // Failed to remove the file
-    }
-}
 
 // RelationalTable
 

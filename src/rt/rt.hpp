@@ -1,6 +1,8 @@
 #ifndef _rt_h_
 #define _rt_h_
 
+#include "helper.hpp"
+
 #include <string>
 #include <vector> 
 #include <cstdint>
