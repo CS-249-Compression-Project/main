@@ -13,7 +13,6 @@ void createFile(const std::string& file_name) {
 
 bool removeFile(const std::string& file_name) {
     if (std::remove(file_name.c_str()) != 0) {
-        std::cerr << "Error: Unable to remove file " << file_name << std::endl;
         return false;
     }
 

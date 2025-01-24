@@ -20,10 +20,12 @@ public:
     RelationalTable(const std::string& file_name, const uint32_t num_columns);
 
     // Add a new row to the table
-    void addRow(const std::vector<uint32_t>& row_data);
+    void addRow_uint32_t(const std::vector<uint32_t>& row_data);
+    void addRow_float(const std::vector<float>& row_data);
 
     // Retrieve a specific row by index
-    std::vector<uint32_t> getRow(uint32_t row_index) const;
+    std::vector<uint32_t> getRow_uint32_t(uint32_t row_index) const;
+    std::vector<float> getRow_float(uint32_t row_index) const;
 
     // Perform a join operation with another table
     RelationalTable join(const RelationalTable& other) const;

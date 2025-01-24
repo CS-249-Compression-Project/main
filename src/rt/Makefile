@@ -2,39 +2,46 @@
 include ../makefile.inc
 
 # Define the sources and the output executable
-SRCS = rt.cpp helper.cpp rt_handler.cpp 
-HEADERS = rt.hpp helper.hpp
-OBJ = $(SRCS:.cpp=.o)
-EXEC = rt_program
-TESTS = test_1
-TESTS_OBJ = $(TESTS:%=%.o)
+TESTS = test_1 test_2 test_3
+TESTS_DIR = ../tests
 
-all:
-	make $(EXEC)
-	make $(TESTS)
+all: rt_program $(TESTS)
 
-# Target to build the executable
-$(EXEC): $(OBJ)
-	$(CC) $(OBJ) -o $(EXEC)
+rt_program: rt_handler.o rt.o helper.o
+	$(CC) rt_handler.o rt.o helper.o -o rt_program
 
-# Rule to compile .cpp files to .o files
-%.o: %.cpp $(HEADERS)
-	$(CC) $(CPPFLAGS) -c $< -o $@
+rt.o: rt.cpp rt.hpp helper.hpp
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# binary dependencies for tests
-$(TESTS): $(TESTS_OBJ) helper.o rt.o 
-	$(CC) $(TESTS_OBJ) helper.o rt.o -o $(TESTS)
+helper.o: helper.cpp helper.hpp
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# obj dependencies
-$(TESTS).o: ../tests/$(TESTS).cpp $(HEADERS)
-	$(CC) $(CPPFLAGS) -c $< -o $@
+# test programs
+test_1: test_1.o rt.o helper.o
+	$(CC) $@.o rt.o helper.o -o $@
+
+test_2: test_2.o rt.o helper.o
+	$(CC) $@.o rt.o helper.o -o $@
+
+test_3: test_3.o rt.o helper.o
+	$(CC) $@.o rt.o helper.o -o $@
+
+# test object files
+test_1.o: $(TESTS_DIR)/test_1.cpp rt.hpp helper.hpp
+	$(CC) $(CFLAGS) -c $< -o $@
+
+test_2.o: $(TESTS_DIR)/test_2.cpp rt.hpp helper.hpp
+	$(CC) $(CFLAGS) -c $< -o $@
+
+test_3.o: $(TESTS_DIR)/test_3.cpp rt.hpp helper.hpp
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # Clean up the generated files
 clean:
-	rm -f $(OBJ) $(EXEC) $(TESTS) $(TESTS_OBJ)
+	rm -f $(OBJ) $(EXEC) $(TESTS) $(TESTS_OBJ) test_* rt_program
 
 superclean:
-	rm -f $(OBJ) $(EXEC) $(TESTS) $(TESTS_OBJ) *~ *.tbl *.o
+	rm -f $(OBJ) $(EXEC) $(TESTS) $(TESTS_OBJ) *~ *.tbl *.o test_* rt_program
 
 # Phony targets (these aren't real files, just commands)
-.PHONY: clean
+.PHONY: clean superclean all

@@ -28,6 +28,97 @@ RelationalTable::RelationalTable(const std::string& file_name, const uint32_t nu
     this->num_columns_ = num_columns;
 }
 
+void RelationalTable::addRow_uint32_t(const std::vector<uint32_t>& row_data) {
+    if (row_data.size() != num_columns_) {
+        std::cerr << "Error: Row data size does not match number of columns" << std::endl;
+        return;
+    }
+
+    std::ofstream file(file_name_, std::ios::binary | std::ios::app);
+    if (!file.is_open()) {
+        std::cerr << "Error: Unable to open file " << file_name_ << std::endl;
+        return;
+    }
+
+    // loop through row_data and write each entry to the file
+    // for (const auto& entry : row_data) {
+    //     file.write(reinterpret_cast<const char*>(&entry), sizeof(entry));
+    // }
+
+    // write the entire row_data vector to the file
+    file.write(reinterpret_cast<const char*>(row_data.data()), row_data.size() * sizeof(row_data[0]));
+
+    file.close();
+    this->num_entries_++;
+    writeNumEntries(num_entries_);
+}
+
+void RelationalTable::addRow_float(const std::vector<float>& row_data) {
+    if (row_data.size() != num_columns_) {
+        std::cerr << "Error: Row data size does not match number of columns" << std::endl;
+        return;
+    }
+
+    std::ofstream file(file_name_, std::ios::binary | std::ios::app);
+    if (!file.is_open()) {
+        std::cerr << "Error: Unable to open file " << file_name_ << std::endl;
+        return;
+    }
+
+    // write the entire row_data vector to the file
+    file.write(reinterpret_cast<const char*>(row_data.data()), row_data.size() * sizeof(row_data[0]));
+
+    file.close();
+    this->num_entries_++;
+    writeNumEntries(num_entries_);
+}
+
+std::vector<uint32_t> RelationalTable::getRow_uint32_t(uint32_t row_index) const {
+    std::ifstream file(file_name_, std::ios::binary | std::ios::in);
+    if (!file.is_open()) {
+        std::cerr << "Error: Unable to open file " << file_name_ << std::endl;
+        return {};
+    }
+
+    // calculate the size of a row in bytes
+    uint32_t row_size = calculateRowSize();
+    // calculate the offset to the row_index
+    uint32_t offset = sizeof(num_entries_) + sizeof(num_columns_) + row_index * row_size;
+
+    // seek to the offset
+    file.seekg(offset);
+
+    // read the row data
+    std::vector<uint32_t> row_data(num_columns_);
+    file.read(reinterpret_cast<char*>(row_data.data()), row_data.size() * sizeof(row_data[0]));
+
+    file.close();
+    return row_data;
+}
+
+std::vector<float> RelationalTable::getRow_float(uint32_t row_index) const {
+    std::ifstream file(file_name_, std::ios::binary | std::ios::in);
+    if (!file.is_open()) {
+        std::cerr << "Error: Unable to open file " << file_name_ << std::endl;
+        return {};
+    }
+
+    // calculate the size of a row in bytes
+    uint32_t row_size = calculateRowSize();
+    // calculate the offset to the row_index
+    uint32_t offset = sizeof(num_entries_) + sizeof(num_columns_) + row_index * row_size;
+
+    // seek to the offset
+    file.seekg(offset);
+
+    // read the row data
+    std::vector<float> row_data(num_columns_);
+    file.read(reinterpret_cast<char*>(row_data.data()), row_data.size() * sizeof(row_data[0]));
+
+    file.close();
+    return row_data;
+}
+
 uint32_t RelationalTable::readNumEntries() const {
     std::ifstream file(file_name_, std::ios::binary | std::ios::in);
     if (!file.is_open()) {
