@@ -9,7 +9,9 @@ EXEC = rt_program
 TESTS = test_1
 TESTS_OBJ = $(TESTS:%=%.o)
 
-all: $(EXEC) test_1
+all:
+	make $(EXEC)
+	make $(TESTS)
 
 # Target to build the executable
 $(EXEC): $(OBJ)
@@ -20,8 +22,8 @@ $(EXEC): $(OBJ)
 	$(CC) $(CPPFLAGS) -c $< -o $@
 
 # binary dependencies for tests
-$(TESTS): $(TESTS_OBJ) $(HEADERS)
-	$(CC) $(OBJ) -o $(TESTS)
+$(TESTS): $(TESTS_OBJ) helper.o rt.o 
+	$(CC) $(TESTS_OBJ) helper.o rt.o -o $(TESTS)
 
 # obj dependencies
 $(TESTS).o: ../tests/$(TESTS).cpp $(HEADERS)
@@ -30,6 +32,9 @@ $(TESTS).o: ../tests/$(TESTS).cpp $(HEADERS)
 # Clean up the generated files
 clean:
 	rm -f $(OBJ) $(EXEC) $(TESTS) $(TESTS_OBJ)
+
+superclean:
+	rm -f $(OBJ) $(EXEC) $(TESTS) $(TESTS_OBJ) *~ *.tbl *.o
 
 # Phony targets (these aren't real files, just commands)
 .PHONY: clean

@@ -3,7 +3,7 @@
 
 int main() {
     removeFile("table1.tbl");
-
+    
     RelationalTable a("table1.tbl", 69);
     std::cout << a.readNumEntries() << std::endl;
     std::cout << a.readNumColumns() << std::endl;

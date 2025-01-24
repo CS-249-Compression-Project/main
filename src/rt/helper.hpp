@@ -7,6 +7,6 @@
 
 bool fileExists(const std::string& file_name);
 void createFile(const std::string& file_name);
-bool removeFile(const char* filename);
+bool removeFile(const std::string& file_name);
 
 #endif
