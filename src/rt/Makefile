@@ -8,7 +8,7 @@ TESTS_DIR = ../tests
 all: rt_program $(TESTS)
 
 rt_program: rt_handler.o rt.o helper.o
-	$(CC) rt_handler.o rt.o helper.o -o rt_program
+	$(CC) rt_handler.o rt.o helper.o -o $@
 
 rt.o: rt.cpp rt.hpp helper.hpp
 	$(CC) $(CFLAGS) -c $< -o $@
