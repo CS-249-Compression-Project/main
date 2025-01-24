@@ -230,6 +230,3 @@ bool RelationalTable::writeNumColumns(uint32_t num_columns) {
     file.close();
     return true;
 }
-
-
-#include <iostream>
