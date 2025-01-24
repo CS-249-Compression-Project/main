@@ -36,7 +36,7 @@ void RelationalTable::printTable() const {
         return;
     }
 
-    std::cout << "Table: " << file_name_ << std::endl;
+    std::cout << "Table Name: " << file_name_ << std::endl;
     std::cout << "Number of entries: " << num_entries_ << std::endl;
     std::cout << "Number of columns: " << num_columns_ << std::endl;
 
