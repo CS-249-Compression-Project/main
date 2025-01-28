@@ -1,13 +1,14 @@
 #include "../rt/rt.hpp"
 #include "../rt/helper.hpp"
 
-int main() {
+int main()
+{
     removeFile("table4.tbl");
-    
+
     RelationalTable a("table4.tbl", 3);
     std::cout << a.readNumEntries() << std::endl;
     std::cout << a.readNumColumns() << std::endl;
-    
+
     a.addRow_float({1.51, 2.2, 3.3});
     a.addRow_float({4.5252, 5.1, 6.51});
     a.addRow_float({7.131, 8.32, 9.3});
