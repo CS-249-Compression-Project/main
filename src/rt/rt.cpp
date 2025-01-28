@@ -172,6 +172,62 @@ std::vector<float> RelationalTable::getRow_float(uint32_t row_index) const
     return row_data;
 }
 
+// Perform a join operation with another table and make the new file
+void RelationalTable::full_outer_join(const RelationalTable &other, const std::string &new_table_file_name) const 
+{
+    // Left Table Open
+    RelationalTable table_left = *this;
+    RelationalTable table_right = other;
+
+    // Get the number of columns for the new table
+    uint32_t num_columns_new = table_left.num_columns_ + table_right.num_columns_;
+
+    // New Table Open
+    RelationalTable table_new(new_table_file_name, num_columns_new);
+
+    // Left Table Open
+    std::ifstream file_left(file_name_, std::ios::binary | std::ios::in);
+    if (!file_left.is_open())
+    {
+        std::cerr << "Error: Unable to open file " << file_name_ << std::endl;
+        return;
+    }
+
+    // Right Table Open
+    std::ifstream file_right(file_name_, std::ios::binary | std::ios::in);
+    if (!file_right.is_open())
+    {
+        std::cerr << "Error: Unable to open file " << file_name_ << std::endl;
+        return;
+    }
+
+    // New Table Open
+    std::ofstream file_new(new_table_file_name, std::ios::binary | std::ios::out);
+
+    // Every entry, add joined row
+    for (uint32_t entry_left = 0; entry_left < table_left.num_entries_; entry_left++)
+    {
+        for (uint32_t entry_right = 0; entry_right < table_right.num_entries_; entry_right++)
+        {
+            // Get the row data for the left table
+            std::vector<float> row_data_left = table_left.getRow_float(entry_left);
+
+            // Get the row data for the right table
+            std::vector<float> row_data_right = table_right.getRow_float(entry_right);
+
+            // Combine the row data
+            std::vector<float> row_data_new = row_data_left;
+            row_data_new.insert(row_data_new.end(), row_data_right.begin(), row_data_right.end());
+
+            // Write the row data to the new table
+            file_new.write(reinterpret_cast<const char *>(row_data_new.data()), row_data_new.size() * sizeof(row_data_new[0]));
+        }
+    }
+
+    return;
+}
+    
+
 uint32_t RelationalTable::readNumEntries() const
 {
     std::ifstream file(file_name_, std::ios::binary | std::ios::in);
