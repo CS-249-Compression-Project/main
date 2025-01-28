@@ -31,7 +31,8 @@ public:
     std::vector<float> getRow_float(uint32_t row_index) const;
 
     // Perform a join operation with another table
-    RelationalTable join(const RelationalTable& other) const;
+    RelationalTable full_outer_join(const RelationalTable& other, const std::string& new_table_file_name) const;
+    RelationalTable inner_join(const RelationalTable& other, const std::vector<uint32_t> col1, const std::vector<uint32_t> col2, const std::string& new_table_file_name) const;
 
     // Compress the table data
     void compressData();
