@@ -31,9 +31,9 @@ public:
     std::vector<uint32_t> getRow_uint32_t(uint32_t row_index) const;
     std::vector<float> getRow_float(uint32_t row_index) const;
 
-    // Perform a join operation with another table
-    RelationalTable full_outer_join(const RelationalTable &other, const std::string &new_table_file_name) const;
-    RelationalTable inner_join(const RelationalTable &other, const std::vector<uint32_t> col1, const std::vector<uint32_t> col2, const std::string &new_table_file_name) const;
+    // Perform a join operation with another table and make the new file
+    void full_outer_join(const RelationalTable &other, const std::string &new_table_file_name) const;
+    void inner_join(const RelationalTable &other, const std::vector<uint32_t> col1, const std::vector<uint32_t> col2, const std::string &new_table_file_name) const;
 
     // Compress the table data
     void compressData();
