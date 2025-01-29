@@ -6,6 +6,9 @@
 
 // RelationalTable
 
+
+RelationalTable::RelationalTable() {}
+
 RelationalTable::RelationalTable(const std::string &file_name) : file_name_(file_name)
 {
     if (!parseMetadata())
@@ -173,7 +176,7 @@ std::vector<float> RelationalTable::getRow_float(uint32_t row_index) const
 }
 
 // Perform a join operation with another table and make the new file
-void RelationalTable::full_outer_join(const RelationalTable &other, const std::string &new_table_file_name) const 
+RelationalTable RelationalTable::full_outer_join(const RelationalTable &other, const std::string &new_table_file_name) const 
 {
     // Left Table Open
     RelationalTable table_left = *this;
@@ -190,7 +193,7 @@ void RelationalTable::full_outer_join(const RelationalTable &other, const std::s
     if (!file_left.is_open())
     {
         std::cerr << "Error: Unable to open file " << file_name_ << std::endl;
-        return;
+        return RelationalTable();
     }
 
     // Right Table Open
@@ -198,13 +201,10 @@ void RelationalTable::full_outer_join(const RelationalTable &other, const std::s
     if (!file_right.is_open())
     {
         std::cerr << "Error: Unable to open file " << file_name_ << std::endl;
-        return;
+        return RelationalTable();
     }
 
-    // New Table Open
-    std::ofstream file_new(new_table_file_name, std::ios::binary | std::ios::out);
-
-    // Every entry, add joined row
+    // Every entry, join left and right and add rows
     for (uint32_t entry_left = 0; entry_left < table_left.num_entries_; entry_left++)
     {
         for (uint32_t entry_right = 0; entry_right < table_right.num_entries_; entry_right++)
@@ -219,12 +219,12 @@ void RelationalTable::full_outer_join(const RelationalTable &other, const std::s
             std::vector<float> row_data_new = row_data_left;
             row_data_new.insert(row_data_new.end(), row_data_right.begin(), row_data_right.end());
 
-            // Write the row data to the new table
-            file_new.write(reinterpret_cast<const char *>(row_data_new.data()), row_data_new.size() * sizeof(row_data_new[0]));
+            // Add the row to the new table
+            table_new.addRow_float(row_data_new);
         }
     }
 
-    return;
+    return RelationalTable(new_table_file_name);
 }
     
 

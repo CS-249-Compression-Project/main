@@ -2,7 +2,7 @@
 include ../makefile.inc
 
 # Define the sources and the output executable
-TESTS = test_1 test_2 test_3 test_4
+TESTS = test_1 test_2 test_3 test_4 test_5
 TESTS_DIR = ../tests
 
 all: rt_program $(TESTS)
@@ -29,6 +29,9 @@ test_3: test_3.o rt.o helper.o
 test_4: test_4.o rt.o helper.o
 	$(CC) $@.o rt.o helper.o -o $@
 
+test_5: test_5.o rt.o helper.o
+	$(CC) $@.o rt.o helper.o -o $@
+
 # test object files
 test_1.o: $(TESTS_DIR)/test_1.cpp rt.hpp helper.hpp
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -40,6 +43,9 @@ test_3.o: $(TESTS_DIR)/test_3.cpp rt.hpp helper.hpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
 test_4.o: $(TESTS_DIR)/test_4.cpp rt.hpp helper.hpp
+	$(CC) $(CFLAGS) -c $< -o $@
+
+test_5.o: $(TESTS_DIR)/test_5.cpp rt.hpp helper.hpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Clean up the generated files
