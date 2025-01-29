@@ -226,7 +226,57 @@ RelationalTable RelationalTable::full_outer_join(const RelationalTable &other, c
 
     return RelationalTable(new_table_file_name);
 }
-    
+
+RelationalTable RelationalTable::inner_join(const RelationalTable &other, const std::string &new_table_file_name, const std::vector<uint32_t> col1, const std::vector<uint32_t> col2) const
+{
+    // Left Table Open
+    RelationalTable table_left = *this;
+    RelationalTable table_right = other;
+
+    // Get the number of columns for the new table
+    uint32_t num_columns_new = table_left.num_columns_ + table_right.num_columns_;
+
+    // New Table Open
+    RelationalTable table_new(new_table_file_name, num_columns_new);
+
+    // Left Table Open
+    std::ifstream file_left(file_name_, std::ios::binary | std::ios::in);
+    if (!file_left.is_open())
+    {
+        std::cerr << "Error: Unable to open file " << file_name_ << std::endl;
+        return RelationalTable();
+    }
+
+    // Right Table Open
+    std::ifstream file_right(file_name_, std::ios::binary | std::ios::in);
+    if (!file_right.is_open())
+    {
+        std::cerr << "Error: Unable to open file " << file_name_ << std::endl;
+        return RelationalTable();
+    }
+
+    // Every entry, join left and right and add rows if the columns match
+    for (uint32_t entry_left : col1)
+    {
+        for (uint32_t entry_right : col2)
+        {
+            // Get the row data for the left table
+            std::vector<float> row_data_left = table_left.getRow_float(entry_left);
+
+            // Get the row data for the right table
+            std::vector<float> row_data_right = table_right.getRow_float(entry_right);
+
+            // Combine the row data
+            std::vector<float> row_data_new = row_data_left;
+            row_data_new.insert(row_data_new.end(), row_data_right.begin(), row_data_right.end());
+
+            // Add the row to the new table
+            table_new.addRow_float(row_data_new);
+        }
+    }
+
+    return RelationalTable(new_table_file_name);
+}
 
 uint32_t RelationalTable::readNumEntries() const
 {

@@ -35,7 +35,7 @@ public:
 
     // Perform a join operation with another table and make the new file
     RelationalTable full_outer_join(const RelationalTable &other, const std::string &new_table_file_name) const;
-    RelationalTable inner_join(const RelationalTable &other, const std::vector<uint32_t> col1, const std::vector<uint32_t> col2, const std::string &new_table_file_name) const;
+    RelationalTable inner_join(const RelationalTable &other, const std::string &new_table_file_name, const std::vector<uint32_t> col1, const std::vector<uint32_t> col2) const;
 
     // Compress the table data
     void compressData();
