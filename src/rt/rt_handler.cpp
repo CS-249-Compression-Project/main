@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     {
         if (argc < 4)
         {
-            std::cerr << "Error: You must specify the number of columns to create.\n";
+            std::cerr << "Usage: ./rt_program create <filename.tbl> <num_col>\n";
             return 1;
         }
 
@@ -25,6 +25,11 @@ int main(int argc, char *argv[])
     }
     else if (command == "read")
     {
+        if (argc < 3)
+        {
+            std::cerr << "Usage: ./rt_program read <filename.tbl>\n";
+            return 1;
+        }
         RelationalTable table(filename);
         table.printTable();
     }
@@ -32,7 +37,7 @@ int main(int argc, char *argv[])
     {
         if (argc < 4)
         {
-            std::cerr << "Error: You must specify the row data to add.\n";
+            std::cerr << "Usage: ./rt_program add <filename.tbl> <item1> <item2> ... <itemN>\n";
             return 1;
         }
 
@@ -50,7 +55,7 @@ int main(int argc, char *argv[])
     {
         if (argc < 5)
         {
-            std::cerr << "Error: You must specify two tables to join and the new table name.\n";
+            std::cerr << "Usage: ./rt_program fullouterjoin <new_filename.tbl> <table1.tbl> <table2.tbl>\n";
             return 1;
         }
         
@@ -64,7 +69,7 @@ int main(int argc, char *argv[])
     {
         if (argc < 6)       
         {
-            std::cerr << "Error: You must specify two tables to join and the new table name.\n";
+            std::cerr << "Usage: ./rt_program innerjoin <new_filename.tbl> <table1.tbl> <\"#,#,#,...\"> <table2.tbl> <\"#,#,#\">\n";
             return 1;
         }
 
