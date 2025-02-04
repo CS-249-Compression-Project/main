@@ -4,7 +4,7 @@ int main(int argc, char *argv[])
 {
     if (argc < 3)
     {
-        std::cerr << "Usage: " << argv[0] << " <create/read> <filename> [num_columns]\n";
+        std::cerr << "Usage: " << argv[0] << " <create/read/add/outerjoin/innerjoin> <filename> [num_columns]\n";
         return 1;
     }
 
