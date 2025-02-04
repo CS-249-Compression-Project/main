@@ -21,3 +21,25 @@ bool removeFile(const std::string &file_name)
 
     return true;
 }
+
+std::vector<uint32_t> splitString(const std::string &str)
+{
+    std::vector<uint32_t> result;
+    std::string temp;
+
+    for (char c : str)
+    {
+        if (c == ',')
+        {
+            result.push_back(std::stoi(temp));
+            temp.clear();
+        }
+        else
+        {
+            temp.push_back(c);
+        }
+    }
+
+    result.push_back(std::stoi(temp));
+    return result;
+}

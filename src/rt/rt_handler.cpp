@@ -46,10 +46,41 @@ int main(int argc, char *argv[])
         table.addRow_float(row_data);
         std::cout << "Row added to table " << filename << ".\n";
     }
+    else if (command == "fullouterjoin")
+    {
+        if (argc < 5)
+        {
+            std::cerr << "Error: You must specify two tables to join and the new table name.\n";
+            return 1;
+        }
+        
+        RelationalTable table1(argv[3]);
+        RelationalTable table2(argv[4]);
 
+        RelationalTable new_table = table1.full_outer_join(table2, filename);
+        new_table.printTable();
+    }
+    else if (command == "innerjoin")
+    {
+        if (argc < 6)       
+        {
+            std::cerr << "Error: You must specify two tables to join and the new table name.\n";
+            return 1;
+        }
+
+        RelationalTable table1(argv[3]);
+        RelationalTable table2(argv[5]);
+ 
+        // Split the string of column indices into a vector of integers
+        std::vector<uint32_t> col1 = splitString(argv[4]);
+        std::vector<uint32_t> col2 = splitString(argv[6]);
+
+        RelationalTable new_table = table1.inner_join(table2, filename, col1, col2);
+        new_table.printTable();
+    }
     else
     {
-        std::cerr << "Invalid command. Use 'create', 'read', or 'add'.\n";
+        std::cerr << "Invalid command. Use 'create', 'read', 'add', 'fullouterjoin', or 'innerjoin'.\n";
         return 1;
     }
 
