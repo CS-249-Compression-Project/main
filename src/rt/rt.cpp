@@ -82,10 +82,10 @@ void RelationalTable::addRow_uint32_t(const std::vector<uint32_t> &row_data)
         return;
     }
 
-    std::ofstream file(file_name_, std::ios::binary | std::ios::app);
+    std::ofstream file(other.file_name_, std::ios::binary | std::ios::app);
     if (!file.is_open())
     {
-        std::cerr << "Error: Unable to open file " << file_name_ << std::endl;
+        std::cerr << "Error: Unable to open file " << other.file_name_ << std::endl;
         return;
     }
 
@@ -197,10 +197,10 @@ RelationalTable RelationalTable::full_outer_join(const RelationalTable &other, c
     }
 
     // Right Table Open
-    std::ifstream file_right(file_name_, std::ios::binary | std::ios::in);
+    std::ifstream file_right(other.file_name_, std::ios::binary | std::ios::in);
     if (!file_right.is_open())
     {
-        std::cerr << "Error: Unable to open file " << file_name_ << std::endl;
+        std::cerr << "Error: Unable to open file " << other.file_name_ << std::endl;
         return RelationalTable();
     }
 
@@ -248,10 +248,10 @@ RelationalTable RelationalTable::inner_join(const RelationalTable &other, const 
     }
 
     // Right Table Open
-    std::ifstream file_right(file_name_, std::ios::binary | std::ios::in);
+    std::ifstream file_right(other.file_name_, std::ios::binary | std::ios::in);
     if (!file_right.is_open())
     {
-        std::cerr << "Error: Unable to open file " << file_name_ << std::endl;
+        std::cerr << "Error: Unable to open file " << other.file_name_ << std::endl;
         return RelationalTable();
     }
 
