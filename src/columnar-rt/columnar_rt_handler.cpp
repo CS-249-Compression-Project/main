@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
         {
             row_data.push_back(std::stof(argv[i]));
         }
-        vector<vector<uint32_t>> row_wrap;
+        std::vector<std::vector<uint32_t>> row_wrap;
         row_wrap.push_back(row_data);
         table.writeRows(filename, row_wrap);
         std::cout << "Row added to table " << filename << ".\n";

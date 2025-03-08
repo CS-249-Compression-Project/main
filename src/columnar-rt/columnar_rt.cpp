@@ -57,8 +57,15 @@ ColumnarRelationalTable::ColumnarRelationalTable(const std::string &file_name, c
 // encoding to use for each column.
 void ColumnarRelationalTable::WriteRowGroupUncompressed_uint32(std::ofstream &file, const vector<vector<uint32_t>> rows) const
 {
+    for(vector<uint32_t> row : rows) {
+        for(uint32_t item : row) {
+            cout << item << " ";
+        }
+        cout << endl;
+    }
     size_t num_entries = rows.size();
     size_t num_columns = rows.at(0).size();
+    cout << rows.size() << " " << rows.at(0).size() << endl;
     for (size_t i = 0; i < num_columns; i++)
     {
         const RepresentationKind columnRepresentation = RepresentationKind::Direct;
@@ -89,6 +96,19 @@ void ColumnarRelationalTable::writeRows(std::string filename, const vector<vecto
     file.close();
 }
 
+vector<vector<uint32_t>> ColumnarRelationalTable::readColumns(string filename, uint32_t columns) {
+    vector<vector<uint32_t>> result;
+    std::ifstream file(filename, std::ios::binary | std::ios::app);
+    if (!file.is_open())
+    {
+        std::cerr << "Error: Unable to open file " << filename << std::endl;
+        return result;
+    }
+    result = this->ReadRowGroup_uint32(file, columns);
+    file.close();
+    return result;
+}
+
 vector<vector<uint32_t>> ColumnarRelationalTable::ReadRowGroup_uint32(std::ifstream &file, const uint32_t num_columns) const
 {
     char buffer[4];
@@ -111,6 +131,7 @@ vector<vector<uint32_t>> ColumnarRelationalTable::ReadRowGroup_uint32(std::ifstr
         case RepresentationKind::Direct:
             if (bytesUsed[column] % sizeof(uint32_t) != 0)
             {
+                cout << "a" << endl;
                 throw "Bad number of bytes for direct-represented uint32_ts";
             }
             for (uint32_t i = 0; i < bytesUsed[column]; i += sizeof(uint32_t))
@@ -137,6 +158,7 @@ vector<vector<uint32_t>> ColumnarRelationalTable::ReadRowGroup_uint32(std::ifstr
         {
             if (columnData[column].size() != num_rows)
             {
+                cout << "b" << endl;
                 throw "Columns have different row counts";
             }
             entry.push_back(columnData[column][row]);
@@ -338,4 +360,33 @@ void ColumnarRelationalTable::setEntryCount(uint32_t new_count)
 {
     this->num_entries_ = new_count;
     writeNumEntries(new_count);
+}
+
+uint32_t ColumnarRelationalTable::readNumEntries() const
+{
+    std::ifstream file(file_name_, std::ios::binary | std::ios::in);
+    if (!file.is_open())
+    {
+        return 0;
+    }
+
+    uint32_t num_entries;
+    file.read(reinterpret_cast<char *>(&num_entries), sizeof(num_entries));
+    file.close();
+    return num_entries;
+}
+
+uint32_t ColumnarRelationalTable::readNumColumns() const
+{
+    std::ifstream file(file_name_, std::ios::binary | std::ios::in);
+    if (!file.is_open())
+    {
+        return 0;
+    }
+
+    uint32_t num_columns;
+    file.seekg(sizeof(num_entries_));
+    file.read(reinterpret_cast<char *>(&num_columns), sizeof(num_columns));
+    file.close();
+    return num_columns;
 }
