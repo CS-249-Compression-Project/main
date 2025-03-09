@@ -26,7 +26,7 @@ ColumnarRelationalTable::ColumnarRelationalTable(const std::string &file_name, c
 {
     if(fileExists(file_name))
     {
-        std::cerr << "Error: Table " << file_name << "already exists" << std::endl;
+        std::cerr << "Error: Table " << file_name << " already exists" << std::endl;
         return;
     }
 
@@ -55,36 +55,33 @@ ColumnarRelationalTable::ColumnarRelationalTable(const std::string &file_name, c
 
 // The eventual generalization of this will be a WriteRowGroup_uint32 that takes another parameter specifying what
 // encoding to use for each column.
-void ColumnarRelationalTable::WriteRowGroupUncompressed_uint32(std::ofstream &file, const vector<vector<uint32_t>> rows) const
+void ColumnarRelationalTable::WriteRowGroupUncompressed_uint32(std::ofstream &file, const vector<vector<uint32_t>> rows)
 {
-    for(vector<uint32_t> row : rows) {
-        for(uint32_t item : row) {
-            cout << item << " ";
-        }
-        cout << endl;
-    }
     size_t num_entries = rows.size();
     size_t num_columns = rows.at(0).size();
-    cout << rows.size() << " " << rows.at(0).size() << endl;
     for (size_t i = 0; i < num_columns; i++)
     {
         const RepresentationKind columnRepresentation = RepresentationKind::Direct;
         // In the generalized version we will need to encode the column's values before we know
         // how many bytes it takes up - e.g. for run-length encoding.
-        const uint32_t bytes_used = num_entries * sizeof(uint32_t);
+        uint32_t bytes_used = num_entries * sizeof(uint32_t);
         file.write(reinterpret_cast<const char *>(&columnRepresentation), sizeof(columnRepresentation));
         file.write(reinterpret_cast<const char *>(&bytes_used), sizeof(bytes_used));
     }
     for (size_t column = 0; column < num_columns; column++)
     {
-        for (const vector<uint32_t> &row : rows)
+        vector<uint32_t> column_data(num_entries);
+        for(size_t row = 0; row < num_entries; row++)
         {
-            file.write(reinterpret_cast<const char *>(&row[column]), sizeof(row[column]));
+            column_data[row] = rows[row][column];
         }
+        file.write(reinterpret_cast<const char *>(column_data.data()), num_entries * sizeof(uint32_t));
+        this->num_entries_++;
     }
+    file.flush();
 }
 
-void ColumnarRelationalTable::writeRows(std::string filename, const vector<vector<uint32_t>> rows) const
+void ColumnarRelationalTable::writeRows(std::string filename, const vector<vector<uint32_t>> rows)
 {
     std::ofstream file(filename, std::ios::binary | std::ios::app);
     if (!file.is_open())
@@ -96,7 +93,7 @@ void ColumnarRelationalTable::writeRows(std::string filename, const vector<vecto
     file.close();
 }
 
-vector<vector<uint32_t>> ColumnarRelationalTable::readColumns(string filename, uint32_t columns) {
+vector<vector<uint32_t>> ColumnarRelationalTable::readRows(string filename, uint32_t rows) const {
     vector<vector<uint32_t>> result;
     std::ifstream file(filename, std::ios::binary | std::ios::app);
     if (!file.is_open())
@@ -104,49 +101,37 @@ vector<vector<uint32_t>> ColumnarRelationalTable::readColumns(string filename, u
         std::cerr << "Error: Unable to open file " << filename << std::endl;
         return result;
     }
-    result = this->ReadRowGroup_uint32(file, columns);
+    result = this->ReadRowGroup_uint32(file, rows);
     file.close();
     return result;
 }
 
 vector<vector<uint32_t>> ColumnarRelationalTable::ReadRowGroup_uint32(std::ifstream &file, const uint32_t num_columns) const
 {
-    char buffer[4];
     vector<RepresentationKind> columnRepresentations;
     vector<uint32_t> bytesUsed;
+    file.seekg(8, std::ios::beg);
     for (uint32_t i = 0; i < num_columns; i++)
     {
-        file.read(buffer, sizeof(RepresentationKind));
-        columnRepresentations.push_back(*reinterpret_cast<RepresentationKind *>(&buffer));
-        file.read(buffer, sizeof(uint32_t));
-        bytesUsed.push_back(*reinterpret_cast<uint32_t *>(&buffer));
+        RepresentationKind rep;
+        file.read(reinterpret_cast<char *>(&rep), sizeof(rep));
+        columnRepresentations.push_back(rep);
+        uint32_t byteCt;
+        file.read(reinterpret_cast<char *>(&byteCt), sizeof(uint32_t));
+        bytesUsed.push_back(byteCt);
     }
 
-    vector<vector<uint32_t>> columnData;
+    vector<vector<uint32_t>> columnData(num_columns);
     for (uint32_t column = 0; column < num_columns; column++)
     {
-        vector<uint32_t> thisColumn;
-        switch (columnRepresentations[column])
+        uint32_t num_elements = bytesUsed[column] / sizeof(uint32_t);
+        if (bytesUsed[column] % sizeof(uint32_t) != 0)
         {
-        case RepresentationKind::Direct:
-            if (bytesUsed[column] % sizeof(uint32_t) != 0)
-            {
-                cout << "a" << endl;
-                throw "Bad number of bytes for direct-represented uint32_ts";
-            }
-            for (uint32_t i = 0; i < bytesUsed[column]; i += sizeof(uint32_t))
-            {
-                // TODO this can probably be optimized by reading multiple uint32_ts at a time
-                // and doing thisColumn.insert() for all of them.
-                // Make sure to increase the size of buffer to do that.
-                file.read(buffer, sizeof(uint32_t));
-                thisColumn.push_back(*reinterpret_cast<uint32_t *>(&buffer));
-            }
-            break;
-        default:
-            throw "Unknown representation kind";
+            throw std::runtime_error("Bad number of bytes for direct-represented uint32_ts");
         }
-        columnData.push_back(thisColumn);
+        columnData[column].resize(num_elements);
+        file.read(reinterpret_cast<char*>(columnData[column].data()), num_elements * sizeof(uint32_t));
+        if(file.eof()) break;
     }
 
     vector<vector<uint32_t>> rowData;
@@ -158,8 +143,7 @@ vector<vector<uint32_t>> ColumnarRelationalTable::ReadRowGroup_uint32(std::ifstr
         {
             if (columnData[column].size() != num_rows)
             {
-                cout << "b" << endl;
-                throw "Columns have different row counts";
+                throw std::runtime_error("Columns have different row counts");
             }
             entry.push_back(columnData[column][row]);
         }
@@ -168,39 +152,20 @@ vector<vector<uint32_t>> ColumnarRelationalTable::ReadRowGroup_uint32(std::ifstr
     return rowData;
 }
 
-ColumnarRelationalTable ColumnarRelationalTable::full_outer_join(const ColumnarRelationalTable &other, const std::string &new_table_file_name) const 
+ColumnarRelationalTable ColumnarRelationalTable::full_outer_join(const ColumnarRelationalTable &other, const std::string &new_table_file_name) 
 {
-    // Left Table Open
-    ColumnarRelationalTable table_left = *this;
-    ColumnarRelationalTable table_right = other;
 
-    int new_entry_count = this->num_entries_;
-
-    // Left Table Open
-    std::ifstream file_left(file_name_, std::ios::binary | std::ios::in);
-    if (!file_left.is_open())
-    {
-        std::cerr << "Error: Unable to open file " << file_name_ << std::endl;
-        return ColumnarRelationalTable();
-    }
-
-    // Right Table Open
-    std::ifstream file_right(other.file_name_, std::ios::binary | std::ios::in);
-    if (!file_right.is_open())
-    {
-        std::cerr << "Error: Unable to open file " << other.file_name_ << std::endl;
-        return ColumnarRelationalTable();
-    }
+    int new_entry_count = 0;
 
     // Read row information for both tables
-    vector<vector<uint32_t>> left_rows = this->ReadRowGroup_uint32(file_left, table_left.num_columns_);
-    vector<vector<uint32_t>> right_rows = this->ReadRowGroup_uint32(file_right, table_right.num_columns_);
+    vector<vector<uint32_t>> left_rows = this->readRows(file_name_, this->num_entries_);
+    vector<vector<uint32_t>> right_rows = this->readRows(other.file_name_, other.num_entries_);
     vector<vector<uint32_t>> new_rows;
 
     // Every entry, join left and right and add rows
-    for (uint32_t entry_left = 0; entry_left < table_left.num_entries_; entry_left++)
+    for (uint32_t entry_left = 0; entry_left < this->num_entries_; entry_left++)
     {
-        for (uint32_t entry_right = 0; entry_right < table_right.num_entries_; entry_right++)
+        for (uint32_t entry_right = 0; entry_right < other.num_entries_; entry_right++)
         {
             // Get the row data for the left table
             std::vector<uint32_t> row_data_left = left_rows[entry_left];
@@ -211,48 +176,24 @@ ColumnarRelationalTable ColumnarRelationalTable::full_outer_join(const ColumnarR
             // Combine the row data
             std::vector<uint32_t> row_data_new = row_data_left;
             row_data_new.insert(row_data_new.end(), row_data_right.begin(), row_data_right.end());
-
             // Add the row to the new table
             new_rows.push_back(row_data_new);
             new_entry_count++;
         }
     }
-
+    ColumnarRelationalTable toReturn = ColumnarRelationalTable(new_table_file_name, this->num_columns_);
     writeRows(new_table_file_name, new_rows);
-    file_left.close();
-    file_right.close();
-    ColumnarRelationalTable toReturn = ColumnarRelationalTable(new_table_file_name);
     toReturn.setEntryCount(new_entry_count);
     return toReturn;
 }
 
-ColumnarRelationalTable ColumnarRelationalTable::inner_join(const ColumnarRelationalTable &other, const std::string &new_table_file_name, const std::vector<uint32_t> col1, const std::vector<uint32_t> col2) const
+ColumnarRelationalTable ColumnarRelationalTable::inner_join(const ColumnarRelationalTable &other, const std::string &new_table_file_name, const std::vector<uint32_t> col1, const std::vector<uint32_t> col2)
 {
-    // Left Table Open
-    ColumnarRelationalTable table_left = *this;
-    ColumnarRelationalTable table_right = other;
-
-    int new_entry_count = this->num_entries_;
-
-    // Left Table Open
-    std::ifstream file_left(file_name_, std::ios::binary | std::ios::in);
-    if (!file_left.is_open())
-    {
-        std::cerr << "Error: Unable to open file " << file_name_ << std::endl;
-        return ColumnarRelationalTable();
-    }
-
-    // Right Table Open
-    std::ifstream file_right(other.file_name_, std::ios::binary | std::ios::in);
-    if (!file_right.is_open())
-    {
-        std::cerr << "Error: Unable to open file " << other.file_name_ << std::endl;
-        return ColumnarRelationalTable();
-    }
+    int new_entry_count = 0;
 
     // Read row information for both tables
-    vector<vector<uint32_t>> left_rows = this->ReadRowGroup_uint32(file_left, table_left.num_columns_);
-    vector<vector<uint32_t>> right_rows = this->ReadRowGroup_uint32(file_right, table_right.num_columns_);
+    vector<vector<uint32_t>> left_rows = this->readRows(file_name_, this->num_entries_);
+    vector<vector<uint32_t>> right_rows = this->readRows(other.file_name_, other.num_entries_);
     vector<vector<uint32_t>> new_rows;
 
     // Every entry, join left and right and add rows if the columns match
@@ -282,10 +223,8 @@ ColumnarRelationalTable ColumnarRelationalTable::inner_join(const ColumnarRelati
         std::cerr << "Error: Unable to open file " << new_table_file_name << std::endl;
         return ColumnarRelationalTable();
     }
+    ColumnarRelationalTable toReturn = ColumnarRelationalTable(new_table_file_name, this->num_columns_);
     writeRows(new_table_file_name, new_rows);
-    file_left.close();
-    file_right.close();
-    ColumnarRelationalTable toReturn = ColumnarRelationalTable(new_table_file_name);
     toReturn.setEntryCount(new_entry_count);
     return toReturn;
 }

@@ -2,7 +2,7 @@
 include ../makefile.inc
 
 # Define the sources and the output executable
-TESTS = test_1 test_2
+TESTS = test_1 test_2 test_3 test_4
 TESTS_DIR = ../column_tests
 
 all: columnar_rt_program $(TESTS)
@@ -23,11 +23,11 @@ test_1: test_1.o columnar_rt.o helper.o
 test_2: test_2.o columnar_rt.o helper.o
 	$(CC) $@.o columnar_rt.o helper.o -o $@
 
-# test_3: test_3.o columnar_rt.o helper.o
-# 	$(CC) $@.o columnar_rt.o helper.o -o $@
+test_3: test_3.o columnar_rt.o helper.o
+	$(CC) $@.o columnar_rt.o helper.o -o $@
 
-# test_4: test_4.o columnar_rt.o helper.o
-# 	$(CC) $@.o columnar_rt.o helper.o -o $@
+test_4: test_4.o columnar_rt.o helper.o
+	$(CC) $@.o columnar_rt.o helper.o -o $@
 
 # test_5: test_5.o columnar_rt.o helper.o
 # 	$(CC) $@.o columnar_rt.o helper.o -o $@
@@ -42,11 +42,11 @@ test_1.o: $(TESTS_DIR)/test_1.cpp columnar_rt.hpp helper.hpp
 test_2.o: $(TESTS_DIR)/test_2.cpp columnar_rt.hpp helper.hpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# test_3.o: $(TESTS_DIR)/test_3.cpp columnar_rt.hpp helper.hpp
-# 	$(CC) $(CFLAGS) -c $< -o $@
+test_3.o: $(TESTS_DIR)/test_3.cpp columnar_rt.hpp helper.hpp
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# test_4.o: $(TESTS_DIR)/test_4.cpp columnar_rt.hpp helper.hpp
-# 	$(CC) $(CFLAGS) -c $< -o $@
+test_4.o: $(TESTS_DIR)/test_4.cpp columnar_rt.hpp helper.hpp
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # test_5.o: $(TESTS_DIR)/test_5.cpp columnar_rt.hpp helper.hpp
 # 	$(CC) $(CFLAGS) -c $< -o $@

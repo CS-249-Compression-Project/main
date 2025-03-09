@@ -14,6 +14,8 @@ using namespace std;
 class ColumnarRelationalTable
 {
 public:
+    uint32_t num_entries_;                    // Number of rows
+    uint32_t num_columns_;                    // Number of columns
     ColumnarRelationalTable();
 
     ColumnarRelationalTable(const std::string &file_name);
@@ -33,8 +35,8 @@ public:
     // std::vector<float> getRow_float(uint32_t row_index) const;
 
     // Perform a join operation with another table and make the new file
-    ColumnarRelationalTable full_outer_join(const ColumnarRelationalTable &other, const string &new_table_file_name) const;
-    ColumnarRelationalTable inner_join(const ColumnarRelationalTable &other, const string &new_table_file_name, const std::vector<uint32_t> col1, const std::vector<uint32_t> col2) const;
+    ColumnarRelationalTable full_outer_join(const ColumnarRelationalTable &other, const string &new_table_file_name);
+    ColumnarRelationalTable inner_join(const ColumnarRelationalTable &other, const string &new_table_file_name, const std::vector<uint32_t> col1, const std::vector<uint32_t> col2);
 
     // Compress the table data
     // void compressData();
@@ -46,15 +48,13 @@ public:
     vector<vector<uint32_t>> ReadRowGroup_uint32(ifstream &file, const uint32_t num_columns) const;
     uint32_t readNumEntries() const;
     uint32_t readNumColumns() const;
-    vector<vector<uint32_t>> readColumns(string filename, uint32_t columns);
+    vector<vector<uint32_t>> readRows(string filename, uint32_t rows) const;
 
     //Adds rows
-    void writeRows(string filename, const vector<vector<uint32_t>> rows) const;
+    void writeRows(string filename, const vector<vector<uint32_t>> rows);
 
 protected:
     string file_name_;                   // File path for the table
-    uint32_t num_entries_;                    // Number of rows
-    uint32_t num_columns_;                    // Number of columns
     vector<vector<uint32_t>> data_; // Entry data
 
     // // Parse metadata and fill num_entries, num_columns
@@ -65,7 +65,7 @@ protected:
 
     // // Setters
     bool writeMetadata(uint32_t num_entries, uint32_t num_columns);
-    void WriteRowGroupUncompressed_uint32(ofstream &file, const vector<vector<uint32_t>> rows) const;
+    void WriteRowGroupUncompressed_uint32(ofstream &file, const vector<vector<uint32_t>> rows);
     bool writeNumEntries(uint32_t num_entries);
     void setEntryCount(uint32_t new_count);
     // bool writeNumColumns(uint32_t num_columns);
