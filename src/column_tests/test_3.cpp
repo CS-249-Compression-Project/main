@@ -15,7 +15,7 @@ int main()
     rows.push_back({13, 14, 15});
     a.writeRows("table3.tbl", rows);
 
-    std::vector<std::vector<uint32_t>> contents = a.readRows("table3.tbl", 3);
+    std::vector<std::vector<uint32_t>> contents = a.readColumns("table3.tbl", 3);
     for (std::vector<uint32_t> row : contents)
     {
         for (uint32_t item : row)

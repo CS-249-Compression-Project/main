@@ -93,7 +93,7 @@ void ColumnarRelationalTable::writeRows(std::string filename, const vector<vecto
     file.close();
 }
 
-vector<vector<uint32_t>> ColumnarRelationalTable::readRows(string filename, uint32_t rows) const {
+vector<vector<uint32_t>> ColumnarRelationalTable::readColumns(string filename, uint32_t columns) const {
     vector<vector<uint32_t>> result;
     std::ifstream file(filename, std::ios::binary | std::ios::app);
     if (!file.is_open())
@@ -101,7 +101,7 @@ vector<vector<uint32_t>> ColumnarRelationalTable::readRows(string filename, uint
         std::cerr << "Error: Unable to open file " << filename << std::endl;
         return result;
     }
-    result = this->ReadRowGroup_uint32(file, rows);
+    result = this->ReadRowGroup_uint32(file, columns);
     file.close();
     return result;
 }
@@ -158,8 +158,8 @@ ColumnarRelationalTable ColumnarRelationalTable::full_outer_join(const ColumnarR
     int new_entry_count = 0;
 
     // Read row information for both tables
-    vector<vector<uint32_t>> left_rows = this->readRows(file_name_, this->num_entries_);
-    vector<vector<uint32_t>> right_rows = this->readRows(other.file_name_, other.num_entries_);
+    vector<vector<uint32_t>> left_rows = this->readColumns(file_name_, this->num_entries_);
+    vector<vector<uint32_t>> right_rows = this->readColumns(other.file_name_, other.num_entries_);
     vector<vector<uint32_t>> new_rows;
 
     // Every entry, join left and right and add rows
@@ -192,8 +192,8 @@ ColumnarRelationalTable ColumnarRelationalTable::inner_join(const ColumnarRelati
     int new_entry_count = 0;
 
     // Read row information for both tables
-    vector<vector<uint32_t>> left_rows = this->readRows(file_name_, this->num_entries_);
-    vector<vector<uint32_t>> right_rows = this->readRows(other.file_name_, other.num_entries_);
+    vector<vector<uint32_t>> left_rows = this->readColumns(file_name_, this->num_entries_);
+    vector<vector<uint32_t>> right_rows = this->readColumns(other.file_name_, other.num_entries_);
     vector<vector<uint32_t>> new_rows;
 
     // Every entry, join left and right and add rows if the columns match

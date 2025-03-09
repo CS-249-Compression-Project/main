@@ -20,7 +20,7 @@ int main()
     rows.push_back({19, 20, 21});
     a.writeRows("table5.tbl", rows);
 
-    std::vector<std::vector<uint32_t>> contents_a = a.readRows("table5.tbl", 3);
+    std::vector<std::vector<uint32_t>> contents_a = a.readColumns("table5.tbl", 3);
     for (std::vector<uint32_t> row : contents_a)
     {
         for (uint32_t item : row)
@@ -45,7 +45,7 @@ int main()
     rows_b.push_back({7, 8, 9});
     b.writeRows("table6.tbl", rows_b);
 
-    std::vector<std::vector<uint32_t>> contents_b = b.readRows("table6.tbl", 3);
+    std::vector<std::vector<uint32_t>> contents_b = b.readColumns("table6.tbl", 3);
     for (std::vector<uint32_t> row : contents_b)
     {
         for (uint32_t item : row)
@@ -60,7 +60,7 @@ int main()
     ColumnarRelationalTable c = a.full_outer_join(b, "table7.tbl");
     cout << endl;
 
-    std::vector<std::vector<uint32_t>> contents_c = c.readRows("table7.tbl", 6);
+    std::vector<std::vector<uint32_t>> contents_c = c.readColumns("table7.tbl", 6);
     for (std::vector<uint32_t> row : contents_c)
     {
         for (uint32_t item : row)

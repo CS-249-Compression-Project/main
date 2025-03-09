@@ -48,7 +48,7 @@ public:
     vector<vector<uint32_t>> ReadRowGroup_uint32(ifstream &file, const uint32_t num_columns) const;
     uint32_t readNumEntries() const;
     uint32_t readNumColumns() const;
-    vector<vector<uint32_t>> readRows(string filename, uint32_t rows) const;
+    vector<vector<uint32_t>> readColumns(string filename, uint32_t columns) const;
 
     //Adds rows
     void writeRows(string filename, const vector<vector<uint32_t>> rows);
