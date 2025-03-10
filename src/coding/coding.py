@@ -5,13 +5,14 @@ from itertools import groupby
 
 
 class Encoder:
-    """Class implementing multiple encoding techniques for data compression."""
+    """Provides encoding and decoding techniques for data"""
     
     @staticmethod
     def constant_encoding(data):
         """
         Constant encoding: Store a single value if all values are identical.
         Returns the encoded data and a flag indicating if encoding was successful.
+        ret: (value, is_constant)
         """
         if not data:
             return None, False
@@ -29,6 +30,7 @@ class Encoder:
         """
         Run length encoding: Store runs of values as (count, value) pairs.
         Returns the encoded data as a list of (count, value) tuples.
+        ret: [(count, value), ...]
         """
         if not data:
             return []
