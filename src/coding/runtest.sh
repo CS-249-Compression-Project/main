@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # List of files to process
-files=("a.txt" "b.txt")  # Replace with your actual file names
+files=("a.txt" "b.txt")
 
 # Encoding loop
 for method in constant rle; do
