@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # List of files to process
-FILES=("zeros.bin" "f1.bin" "f2.bin")
+FILES=("zeros.bin" "f1.bin" "f2.bin" "f3.bin")
 
 python createtests.py
 

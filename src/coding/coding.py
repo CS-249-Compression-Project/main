@@ -46,6 +46,7 @@ class Encoder:
         all values in that chunk with the same bit width.
         
         Returns a list of (max_bits, chunk_values) pairs.
+        ret: [(bits_per_value, packed_values), ...]
         """
         if not data:
             return []
