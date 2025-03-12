@@ -28,15 +28,32 @@ class Encoder:
     @staticmethod
     def run_length_encoding(data):
         """
-        Run length encoding: Store runs of values as (count, value) pairs.
+        Run length encoding: Process data as 4-byte integers, storing runs of identical
+        4-byte values as (count, value) pairs.
 
-        Returns the encoded data as a list of (count, value) tuples.
+        Returns the encoded data as a list of (count, value) tuples where value is a 4-byte integer.
         ret: [(count, value), ...]
         """
         if not data:
             return []
-            
-        return [(len(list(g)), k) for k, g in groupby(data)]
+        
+        # Convert byte list into integers (4 bytes per integer)
+        integers = []
+        for i in range(0, len(data), 4):
+            if i + 4 <= len(data):
+                # Convert 4 bytes to an integer (little-endian)
+                value = data[i] | (data[i+1] << 8) | (data[i+2] << 16) | (data[i+3] << 24)
+                integers.append(value)
+            else:
+                # Handle the last chunk if it's less than 4 bytes
+                remaining = len(data) - i
+                value = 0
+                for j in range(remaining):
+                    value |= (data[i+j] << (j*8))
+                integers.append(value)
+        
+        # Apply run-length encoding on the integers
+        return [(len(list(g)), k) for k, g in groupby(integers)]
     
     @staticmethod
     def bit_packing_encoding(data):
@@ -108,11 +125,20 @@ class Encoder:
     
     @staticmethod
     def decode_rle(encoded_data):
-        """Decode run-length encoded data."""
-        result = []
+        """Decode run-length encoded data where each value is a 4-byte integer."""
+        result_integers = []
         for count, value in encoded_data:
-            result.extend([value] * count)
-        return result
+            result_integers.extend([value] * count)
+        
+        # Convert integers back to bytes
+        result_bytes = []
+        for integer in result_integers:
+            result_bytes.append(integer & 0xFF)
+            result_bytes.append((integer >> 8) & 0xFF)
+            result_bytes.append((integer >> 16) & 0xFF)
+            result_bytes.append((integer >> 24) & 0xFF)
+        
+        return result_bytes
     
     @staticmethod
     def decode_bit_packing(encoded_chunks, original_length):
@@ -202,11 +228,11 @@ def encode_file(input_file, output_file, encoding_type):
                 f.write(struct.pack('<I', len(data)))
                 # Write number of RLE pairs (4 bytes)
                 f.write(struct.pack('<I', len(encoded_data)))
-                # Write each count-value pair (5 bytes each: 4 for count, 1 for value)
+                # Write each count-value pair (8 bytes each: 4 for count, 4 for value)
                 for count, value in encoded_data:
-                    f.write(struct.pack('<IB', count, value))
+                    f.write(struct.pack('<II', count, value))
             
-            encoded_size = 9 + (5 * len(encoded_data))  # 1+4+4 bytes for header + 5 bytes per pair
+            encoded_size = 9 + (8 * len(encoded_data))  # 1+4+4 bytes for header + 8 bytes per pair
             
         elif encoding_type == 'bit':
             encoded_chunks = Encoder.bit_packing_encoding(data)
@@ -276,7 +302,7 @@ def decode_file(input_file, output_file):
                 encoded_data = []
                 for _ in range(num_pairs):
                     count = struct.unpack('<I', f.read(4))[0]
-                    value = f.read(1)[0]
+                    value = struct.unpack('<I', f.read(4))[0]  # Now reading 4 bytes for value instead of 1
                     encoded_data.append((count, value))
                 decoded_data = Encoder.decode_rle(encoded_data)
                 
